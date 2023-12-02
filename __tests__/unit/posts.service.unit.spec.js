@@ -22,14 +22,87 @@ describe('Posts Service Unit Test', () => {
     });
 
     test('findAllPosts Method', async () => {
-        // TODO: 여기에 코드를 작성해야합니다.
+        const samplePosts = [
+            {
+                postId: 2,
+                nickname: '욱기정',
+                title: '제목 입니다',
+                createdAt: '2023-12-02T11:37:57.261Z',
+                updatedAt: '2023-12-02T11:37:57.261Z',
+            },
+            {
+                postId: 3,
+                nickname: '욱기정',
+                title: '제목 입니다',
+                createdAt: '2023-12-03T11:37:57.261Z',
+                updatedAt: '2023-12-03T11:37:57.261Z',
+            },
+        ];
+
+        mockPostsRepository.findAllPosts.mockReturnValue(samplePosts);
+
+        const allPosts = await postsService.findAllPosts();
+
+        expect(allPosts).toEqual(
+            samplePosts.sort((a, b) => {
+                return b.createdAt - a.createdAt;
+            })
+        );
+
+        expect(mockPostsRepository.findAllPosts).toHaveBeenCalledTimes(1);
     });
 
     test('deletePost Method By Success', async () => {
-        // TODO: 여기에 코드를 작성해야합니다.
+        const samplePost = {
+            postId: 2,
+            nickname: '욱기정',
+            password: '1234',
+            title: '제목 입니다',
+            content: '테스트 코드용 내용입니다',
+            createdAt: '2023-12-02T11:37:57.261Z',
+            updatedAt: '2023-12-02T11:37:57.261Z',
+        };
+
+        mockPostsRepository.findPostById.mockReturnValue(samplePost);
+
+        const deletedPost = await postsService.deletePost(2, '1234');
+
+        expect(mockPostsRepository.findPostById).toHaveBeenCalledTimes(1);
+        expect(mockPostsRepository.findPostById).toHaveBeenCalledWith(
+            samplePost.postId
+        );
+
+        expect(mockPostsRepository.deletePost).toHaveBeenCalledTimes(1);
+        expect(mockPostsRepository.deletePost).toHaveBeenCalledWith(
+            samplePost.postId,
+            samplePost.password
+        );
+
+        expect(deletedPost).toEqual({
+            postId: samplePost.postId,
+            nickname: samplePost.nickname,
+            title: samplePost.title,
+            content: samplePost.content,
+            createdAt: samplePost.createdAt,
+            updatedAt: samplePost.updatedAt,
+        });
     });
 
     test('deletePost Method By Not Found Post Error', async () => {
-        // TODO: 여기에 코드를 작성해야합니다.
+        const samplePost = null;
+        mockPostsRepository.findPostById.mockReturnValue(samplePost);
+
+        try {
+            await postsService.deletePost(123123123, 'asdasdasd');
+        } catch (err) {
+            expect(mockPostsRepository.findPostById).toHaveBeenCalledTimes(1);
+            expect(mockPostsRepository.findPostById).toHaveBeenCalledWith(
+                123123123
+            );
+
+            expect(mockPostsRepository.deletePost).toHaveBeenCalledTimes(0);
+            // 2. 찾은 게시글이 없을 때, Error가 발생합니다. ("존재하지 않는 게시글입니다.");
+            expect(err.message).toEqual('존재하지 않는 게시글입니다.');
+        }
     });
 });

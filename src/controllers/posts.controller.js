@@ -35,6 +35,10 @@ export class PostsController {
         try {
             const { nickname, password, title, content } = req.body;
 
+            if (!nickname || !password || !content || !title) {
+                throw new Error('필수 값 미입력');
+            }
+
             // 서비스 계층에 구현된 createPost 로직을 실행합니다.
             const createdPost = await this.postsService.createPost(
                 nickname,
